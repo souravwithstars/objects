@@ -22,12 +22,12 @@ const scoreCard = function (teamName, players) {
   return teamScore;
 };
 
-const isInningsContinue = function (balls, wickets) {
-  return balls > 0 && wickets < 11;
+const isInningsContinue = function (balls, scoreCard) {
+  return balls > 0 && scoreCard['wickets'] < 11;
 };
 
-const isInningsOver = function (currentBall, totalBalls, wickets) {
-  return currentBall >= totalBalls || wickets >= 11;
+const isInningsOver = function (totalBalls, scoreCard) {
+  return scoreCard['balls'] >= totalBalls || scoreCard['wickets'] >= 11;
 };
 
 const updateRunInTheBall = function (runInTheBall) {
@@ -58,7 +58,7 @@ const updateScoreCard = function (scoreCard, batsman, runInTheBall) {
 const firstInnings = function (scoreCard, totalBalls, players, startingIndex) {
   let ballsToBowl = totalBalls;
   let index = startingIndex;
-  while (isInningsContinue(ballsToBowl, scoreCard['wickets'])) {
+  while (isInningsContinue(ballsToBowl, scoreCard)) {
     let batsman = players[index];
     let runInTheBall = randomInt(15);
     updateScoreCard(scoreCard, batsman, runInTheBall);
@@ -74,7 +74,7 @@ const secondInnings = function (scoreCard, totalBalls, players, target) {
   while (scoreCard['total'] < target) {
     let index = scoreCard['wickets'];
     scoreCard = firstInnings(scoreCard, 1, players, index);
-    if (isInningsOver(scoreCard['balls'], totalBalls, scoreCard['wickets'])) {
+    if (isInningsOver(totalBalls, scoreCard)) {
       break;
     }
   }
