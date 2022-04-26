@@ -10,7 +10,7 @@ let teams = { 'india': india, 'australia': australia };
 const scoreCard = function (teamName, players) {
   let scores = {};
   for (let index = 0; index < players.length; index++) {
-    scores[players[index]] = { runs: 0, balls: 0 };
+    scores[players[index]] = { runs: 0, balls: 0, strikeRate: 0 };
   }
   let teamScore = {
     'team': teamName,
@@ -44,14 +44,17 @@ const updateRunInTheBall = function (runInTheBall) {
 
 const updateScoreCard = function (scoreCard, batsman, runInTheBall) {
   runInTheBall = updateRunInTheBall(runInTheBall);
-  scoreCard['scores'][batsman]['balls'] += 1;
+  let batsmanRecords = scoreCard['scores'][batsman];
+  batsmanRecords['balls'] += 1;
   scoreCard['balls'] += 1;
   if (runInTheBall > 14) {
     scoreCard['wickets'] += 1;
   } else {
-    scoreCard['scores'][batsman]['runs'] += runInTheBall;
+    batsmanRecords['runs'] += runInTheBall;
     scoreCard['total'] += runInTheBall;
   }
+  batsmanRecords['strikeRate'] = Math.round(100 *
+    batsmanRecords['runs'] / batsmanRecords['balls']);
   return scoreCard;
 };
 
