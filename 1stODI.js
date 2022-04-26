@@ -5,23 +5,20 @@ const randomInt = function (number) {
   return Math.round(Math.random() * number);
 };
 
-let teams = {
-  'india': india,
-  'australia': australia,
-};
+let teams = { 'india': india, 'australia': australia };
 
 const scoreCard = function (teamName, players) {
+  let scores = {};
+  for (let index = 0; index < players.length; index++) {
+    scores[players[index]] = { runs: 0, balls: 0 };
+  }
   let teamScore = {
     'team': teamName,
     'total': 0,
     'balls': 0,
-    'wickets': 0
+    'wickets': 0,
+    'scores': scores
   };
-  let runs = {};
-  for (let index = 0; index < players.length; index++) {
-    runs[players[index]] = { run: 0, ball: 0 };
-  }
-  teamScore['runs'] = runs;
   return teamScore;
 };
 
@@ -33,52 +30,63 @@ const isInningsOver = function (currentBall, totalBalls, wickets) {
   return currentBall >= totalBalls || wickets >= 11;
 };
 
+const updateRunInTheBall = function (runInTheBall) {
+  const zeroRun = [7, 8, 9, 10, 11, 12, 13, 14];
+  const oneRun = [1, 3, 5];
+  if (oneRun.includes(runInTheBall)) {
+    runInTheBall = 1;
+  }
+  if (zeroRun.includes(runInTheBall)) {
+    runInTheBall = 0;
+  }
+  return runInTheBall;
+}
+
+const updateScoreCard = function (scoreCard, batsman, runInTheBall) {
+  runInTheBall = updateRunInTheBall(runInTheBall);
+  scoreCard['scores'][batsman]['balls'] += 1;
+  scoreCard['balls'] += 1;
+  if (runInTheBall > 14) {
+    scoreCard['wickets'] += 1;
+  } else {
+    scoreCard['scores'][batsman]['runs'] += runInTheBall;
+    scoreCard['total'] += runInTheBall;
+  }
+  return scoreCard;
+};
+
 const firstInnings = function (scoreCard, totalBalls, players, startingIndex) {
   let ballsToBowl = totalBalls;
   let index = startingIndex;
   while (isInningsContinue(ballsToBowl, scoreCard['wickets'])) {
     let batsman = players[index];
-    let runInTheBall = randomInt(8);
-    if (runInTheBall === 5) {
-      runInTheBall = 1;
-    }
-    scoreCard['runs'][batsman]['ball'] += 1;
-    scoreCard['balls'] += 1;
-    if (runInTheBall > 6) {
-      scoreCard['wickets'] += 1;
+    let runInTheBall = randomInt(15);
+    updateScoreCard(scoreCard, batsman, runInTheBall);
+    if (runInTheBall > 14) {
       index += 1;
-    } else {
-      scoreCard['runs'][batsman]['run'] += runInTheBall;
-      scoreCard['total'] += runInTheBall;
     }
     ballsToBowl--;
   }
   return scoreCard;
 };
 
-const secondInnings = function (scoreCardOfSecond, totalBalls, players, target) {
-  while (scoreCardOfSecond['total'] < target) {
-    let index = scoreCardOfSecond['wickets'];
-    scoreCardOfSecond = firstInnings(scoreCardOfSecond, 1, players, index);
-    if (isInningsOver(scoreCardOfSecond['balls'], totalBalls, scoreCardOfSecond['wickets'])) {
+const secondInnings = function (scoreCard, totalBalls, players, target) {
+  while (scoreCard['total'] < target) {
+    let index = scoreCard['wickets'];
+    scoreCard = firstInnings(scoreCard, 1, players, index);
+    if (isInningsOver(scoreCard['balls'], totalBalls, scoreCard['wickets'])) {
       break;
     }
   }
-  return scoreCardOfSecond;
+  return scoreCard;
 };
 
 const decideResult = function (scoreCardOfFirst, scoreCardOfSecond) {
-  const firstTeamScore = scoreCardOfFirst['total'];
-  const secondTeamScore = scoreCardOfSecond['total'];
-
-  const firstTeamName = scoreCardOfFirst['team'];
-  const secondTeamName = scoreCardOfSecond['team'];
-
-  let result = firstTeamName + ' won !';
-  if (firstTeamScore < secondTeamScore) {
-    result = secondTeamName + ' won !';
+  let result = scoreCardOfFirst['team'] + ' won !';
+  if (scoreCardOfFirst['total'] < scoreCardOfSecond['total']) {
+    result = scoreCardOfSecond['team'] + ' won !';
   }
-  if (firstTeamScore === secondTeamScore) {
+  if (scoreCardOfFirst['total'] === scoreCardOfSecond['total']) {
     result = 'Match Draw';
   }
   return result;
@@ -97,25 +105,20 @@ const match = function (team1, team2, totalBalls) {
   const faceOfCoin = coinsFace[randomInt(1)];
 
   const firstBattingTeam = choiceOfTeam === faceOfCoin ? team1 : team2;
-  const secondBattingTeam = choiceOfTeam === faceOfCoin ? team2 : team1;
+  const secBattingTeam = choiceOfTeam === faceOfCoin ? team2 : team1;
 
-  let scoreCardOfFirst = {};
-  let scoreCardOfSecond = {};
+  let scoreCardOfFirst = scoreCard(firstBattingTeam, teams[firstBattingTeam]);
+  let scoreCardOfSecond = scoreCard(secBattingTeam, teams[secBattingTeam]);
 
-  scoreCardOfFirst = scoreCard(firstBattingTeam, teams[firstBattingTeam]);
-  scoreCardOfSecond = scoreCard(secondBattingTeam, teams[secondBattingTeam]);
-
-  scoreCardOfFirst = firstInnings(scoreCardOfFirst, totalBalls, teams[firstBattingTeam], 0);
-
+  firstInnings(scoreCardOfFirst, totalBalls, teams[firstBattingTeam], 0);
   const target = scoreCardOfFirst['total'] + 1;
-
-  scoreCardOfSecond = secondInnings(scoreCardOfSecond, totalBalls, teams[secondBattingTeam], target);
+  secondInnings(scoreCardOfSecond, totalBalls, teams[secBattingTeam], target);
 
   let result = decideResult(scoreCardOfFirst, scoreCardOfSecond);
 
   matchStat(scoreCardOfFirst, scoreCardOfSecond, result);
 };
 
-const totalBalls = 120;
+const totalBalls = 300;
 
 match('india', 'australia', totalBalls);
