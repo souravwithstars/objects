@@ -12,14 +12,13 @@ const scoreCard = function (teamName, players) {
   for (let index = 0; index < players.length; index++) {
     scores[players[index]] = { runs: 0, balls: 0, strikeRate: 0 };
   }
-  let teamScore = {
+  return {
     'team': teamName,
     'total': 0,
     'balls': 0,
     'wickets': 0,
     'scores': scores
   };
-  return teamScore;
 };
 
 const isInningsContinue = function (balls, scoreCard) {
@@ -34,24 +33,24 @@ const updateRunInTheBall = function (runInTheBall) {
   const zeroRun = [7, 8, 9, 10, 11, 12, 13, 14];
   const oneRun = [1, 3, 5];
   if (oneRun.includes(runInTheBall)) {
-    runInTheBall = 1;
+    return 1;
   }
   if (zeroRun.includes(runInTheBall)) {
-    runInTheBall = 0;
+    return 0;
   }
   return runInTheBall;
 }
 
 const updateScoreCard = function (scoreCard, batsman, runInTheBall) {
-  runInTheBall = updateRunInTheBall(runInTheBall);
+  const currentHit = updateRunInTheBall(runInTheBall);
   let batsmanRecords = scoreCard['scores'][batsman];
   batsmanRecords['balls'] += 1;
   scoreCard['balls'] += 1;
-  if (runInTheBall > 14) {
+  if (currentHit > 14) {
     scoreCard['wickets'] += 1;
   } else {
-    batsmanRecords['runs'] += runInTheBall;
-    scoreCard['total'] += runInTheBall;
+    batsmanRecords['runs'] += currentHit;
+    scoreCard['total'] += currentHit;
   }
   batsmanRecords['strikeRate'] = Math.round(100 *
     batsmanRecords['runs'] / batsmanRecords['balls']);
@@ -78,7 +77,7 @@ const secondInnings = function (scoreCard, totalBalls, players, target) {
     let index = scoreCard['wickets'];
     scoreCard = firstInnings(scoreCard, 1, players, index);
     if (isInningsOver(totalBalls, scoreCard)) {
-      break;
+      return scoreCard;
     }
   }
   return scoreCard;
@@ -87,10 +86,10 @@ const secondInnings = function (scoreCard, totalBalls, players, target) {
 const decideResult = function (scoreCardOfFirst, scoreCardOfSecond) {
   let result = scoreCardOfFirst['team'] + ' won !';
   if (scoreCardOfFirst['total'] < scoreCardOfSecond['total']) {
-    result = scoreCardOfSecond['team'] + ' won !';
+    return scoreCardOfSecond['team'] + ' won !';
   }
   if (scoreCardOfFirst['total'] === scoreCardOfSecond['total']) {
-    result = 'Match Draw';
+    return 'Match Draw';
   }
   return result;
 };
