@@ -39,7 +39,7 @@ const updateRunInTheBall = function (runInTheBall) {
     return 0;
   }
   return runInTheBall;
-}
+};
 
 const updateScoreCard = function (scoreCard, batsman, runInTheBall) {
   const currentHit = updateRunInTheBall(runInTheBall);
@@ -95,8 +95,17 @@ const decideResult = function (scoreCardOfFirst, scoreCardOfSecond) {
 };
 
 const matchStat = function (scoreCardOfFirst, scoreCardOfSecond, result) {
-  console.log('First Innings', scoreCardOfFirst);
-  console.log('Second Innings', scoreCardOfSecond);
+  const keysOfCard = Object.keys(scoreCardOfFirst);
+  console.log('First Innings : -');
+  keysOfCard.map(function (key) {
+    key === 'scores' ? console.table(scoreCardOfFirst[key])
+      : console.log(key, ':', scoreCardOfFirst[key]);
+  });
+  console.log('Second Innings : -');
+  keysOfCard.map(function (key) {
+    key === 'scores' ? console.table(scoreCardOfSecond[key])
+      : console.log(key, ':', scoreCardOfSecond[key]);
+  });
   console.log('Match Result', result);
 };
 
