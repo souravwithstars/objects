@@ -106,15 +106,20 @@ const match = function (team1, team2, totalBalls) {
   const choiceOfTeam = coinsFace[randomInt(1)];
   const faceOfCoin = coinsFace[randomInt(1)];
 
-  const firstBattingTeam = choiceOfTeam === faceOfCoin ? team1 : team2;
-  const secBattingTeam = choiceOfTeam === faceOfCoin ? team2 : team1;
+  let firstBattingTeam = team1;
+  let secBattingTeam = team2;
+
+  if (choiceOfTeam !== faceOfCoin) {
+    firstBattingTeam = team2;
+    secBattingTeam = team1;
+  }
 
   let scoreCardOfFirst = scoreCard(firstBattingTeam, teams[firstBattingTeam]);
   let scoreCardOfSecond = scoreCard(secBattingTeam, teams[secBattingTeam]);
 
-  firstInnings(scoreCardOfFirst, totalBalls, teams[firstBattingTeam], 0);
+  scoreCardOfFirst = firstInnings(scoreCardOfFirst, totalBalls, teams[firstBattingTeam], 0);
   const target = scoreCardOfFirst['total'] + 1;
-  secondInnings(scoreCardOfSecond, totalBalls, teams[secBattingTeam], target);
+  scoreCardOfSecond = secondInnings(scoreCardOfSecond, totalBalls, teams[secBattingTeam], target);
 
   let result = decideResult(scoreCardOfFirst, scoreCardOfSecond);
 
